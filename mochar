@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+video=$(basename "$1")
+nombre="${video%.*}"
+extension="${video##*.}"
+inicio=$2
+fin=$3
+extra=$4
+# duracion=$ ffprobe -show_entries format=duration -of csv=p=0 ${1}
+# restante=$(($duracion-4))
+# echo ${duracion}
+# echo ${restante}
+
+if (($# == 2))
+then
+	ffmpeg -hide_banner -ss "${inicio}" -i "${1}" -y -c:v copy -c:a copy "${nombre}"_mochado.${extension}
+elif (($# == 3))
+then
+	ffmpeg -hide_banner -ss "${inicio}" -i "${1}" -y -c:v copy -c:a copy -t "${fin}" "${nombre}"_mochado.${extension}
+elif (($# == 4))
+then
+	if [[ -e /dev/dri/renderD128 ]]
+	then
+		echo "STEAM DECK DETECTADO"
+		ffmpeg -hide_banner -vaapi_device /dev/dri/renderD128 -ss "${inicio}" -i "${1}" -y -vf "${extra}",format=nv12,hwupload -c:v hevc_vaapi -qp 26 -t "${fin}" "${nombre}"_mochado.mp4
+	else
+		ffmpeg -hide_banner -ss "${inicio}" -i "${1}" -y -vf "${extra}" -c:v libx264 -t "${fin}" "${nombre}"_mochado.mp4
+	fi
+fi
+
+exit 0
+
+#DEV.LS h264                 H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10 (decoders: h264 h264_v4l2m2m h264_qsv libopenh264 h264_cuvid ) (encoders: libx264 libx264rgb libopenh264 h264_nvenc h264_qsv h264_v4l2m2m h264_vaapi nvenc nvenc_h264 )
+#DEV.L. hevc                 H.265 / HEVC (High Efficiency Video Coding) (decoders: hevc hevc_qsv hevc_v4l2m2m hevc_cuvid ) (encoders: libx265 nvenc_hevc hevc_nvenc hevc_qsv hevc_v4l2m2m hevc_vaapi libkvazaar

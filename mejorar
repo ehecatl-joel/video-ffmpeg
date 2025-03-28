@@ -1,0 +1,32 @@
+#!/bin/bash
+video=$(basename "$1")
+nombre="${video%.*}"
+gama=$2
+sat=$3
+cont=$4
+
+#ffmpeg -hwaccel vaapi -hwaccel_output_format vaapi -i input.mp4 -vf 'format=vaapi,hwupload' -c:v hevc_vaapi -qp 32 ~/output.mp4
+
+# H.264 alias AVC
+#ffmpeg -hwaccel vaapi -hwaccel_output_format vaapi -i input.mp4 -vf 'format=vaapi,hwupload' -c:v h264_vaapi -qp 25 ~/output.mp4
+
+
+if (($# == 1))
+then
+	if [[ -e /dev/dri/renderD128 ]]
+	then
+		echo "STEAM DECK DETECTADO"
+		ffmpeg -hide_banner -vaapi_device /dev/dri/renderD128 -i "${1}" -y -c:v hevc_vaapi -qp 25 -strict -2 -c:a copy -vf eq=gamma=1.5:saturation=1.4:contrast=1.2,format=nv12,hwupload "${nombre}"_mejorado.mp4
+	else
+		ffmpeg -hide_banner -i "${1}" -y -preset slow -strict -2 -c:a copy -c:v libx264 -vf eq=gamma=1.5:saturation=1.4:contrast=1.2 "${nombre}"_mejorado.mp4
+	fi
+else	
+	if [[ -e /dev/dri/renderD128 ]]
+	then
+		echo "STEAM DECK DETECTADO"
+		ffmpeg -hide_banner -vaapi_device /dev/dri/renderD128 -i "${1}" -y -c:v hevc_vaapi -qp 25 -strict -2 -c:a copy -vf eq=gamma=${gama}:saturation=${sat}:contrast=${cont},format=nv12,hwupload "${nombre}"_mejorado.mp4
+	else
+		ffmpeg -hide_banner -i "${1}" -y -preset slow -strict -2 -c:a copy -c:v libx264 -vf eq=gamma=${gama}:saturation=${sat}:contrast=${cont} "${nombre}"_mejorado.mp4
+	fi
+fi
+exit 0

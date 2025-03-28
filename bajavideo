@@ -1,0 +1,56 @@
+#!/bin/bash
+
+url=$1
+extra=$2
+sitio=$3
+salida="%(channel)s - %(title)s [%(height)s].%(ext)s"
+opciones="--write-sub --sub-format srt --sub-lang es,es-419,en,en-GB --convert-subs srt --embed-subs --merge-output-format mp4 --restrict-filenames --embed-chapters"
+# opciones="--merge-output-format mp4 --restrict-filenames"
+
+if [ -n "$3" ] && [ "$3" == "nebula" ]
+then
+    identificacion="--username ehecatl.joel@gmail.com --password J6pu@8FNxvE^"
+else
+    identificacion=""
+fi
+
+if [ -n "$2" ] && [ "$2" == "4k" ]
+then
+    yt-dlp -f 'best[height>=1440]' $opciones "${url}" -o "$salida" $identificacion
+
+elif [ -n "$2" ] && [ "$2" == "fhd" ]
+then
+    yt-dlp -f 'best[height=1080]' $opciones ""${url}"" -o "$salida" $identificacion
+
+elif [ -n "$2" ] && [ "$2" == "hd" ]
+then
+    yt-dlp -f 'bestvideo[height<=720]+bestaudio/best' $opciones ""${url}"" -o "$salida" $identificacion
+
+elif [ -n "$2" ] && [ "$2" == "sd" ]
+then
+    yt-dlp -f 'bestvideo[height<=480]+bestaudio/best' $opciones ""${url}"" -o "$salida" $identificacion
+
+elif [ -n "$2" ] && [ "$2" == "max" ]
+then
+    yt-dlp -f 'bestvideo+bestaudio/best' $opciones ""${url}"" -o "$salida" $identificacion
+
+elif [ -n "$2" ] && [ "$2" == "jf" ]
+then
+    yt-dlp $opciones --write-info-json --write-thumbnail ""${url}"" -o "$salida" $identificacion
+
+elif [ -n "$2" ] && [ "$2" == "canalmax" ]
+then
+    yt-dlp ${opciones} --write-info-json --write-thumbnail --download-archive "bajacanal.txt" --playlist-reverse --cookies /home/ehecatl/Nube/respaldos/credenciales/cookie-youtube.txt -f "bestvideo+bestaudio/best" "${url}" -o "%(uploader)s/%(upload_date>%Y-%m-%d)s - %(title)s.%(ext)s"
+
+elif [ -n "$2" ] && [ "$2" == "canalfhd" ]
+then
+    yt-dlp ${opciones} --write-info-json --write-thumbnail --download-archive "bajacanal.txt" --playlist-reverse --cookies /home/ehecatl/Nube/respaldos/credenciales/cookie-youtube.txt -f 'best[height<=1080]' "${url}" -o "%(uploader)s/%(upload_date>%Y-%m-%d)s - %(title)s.%(ext)s"
+
+elif [ -n "$2" ] && [ "$2" == "canalhd" ]
+then
+    yt-dlp ${opciones} --write-info-json --write-thumbnail --download-archive "bajacanal.txt" --playlist-reverse --cookies /home/ehecatl/Nube/respaldos/credenciales/cookie-youtube.txt -f 'best[height<=720]' "${url}" -o "%(uploader)s/%(upload_date>%Y-%m-%d)s - %(title)s.%(ext)s"
+
+else
+
+    yt-dlp -f 'bestvideo+bestaudio/best' $opciones ""${url}"" -o "$salida" $identificacion
+fi
